@@ -17,3 +17,5 @@ Using megaparsec package for parsing
 and gloss for graphics from hackage
 the haskell package library. 
 
+![](/readmeImages/commandLine.png)
+![](/readmeImages/graph.png)
