@@ -1,7 +1,7 @@
 module Main where
 
 import Graphics.Gloss (Display(..), display)
-import Graphics.Gloss.Data.Color (white, orange, black)
+import Graphics.Gloss.Data.Color (white, orange, black, red)
 import Graphics.Gloss.Data.Picture (Picture (..), Point, Path)
 import Graphics.Gloss.Interface.Environment (getScreenSize)
 import Data.Tuple (fst, snd)
@@ -239,7 +239,7 @@ main = do
                          | x <- [negate $ round (widthOfScreen / 2) .. round (widthOfScreen / 2)]
                         ]
              functionLine :: Picture
-             functionLine = Line functionLineCoordinates
+             functionLine = Color red $ Line functionLineCoordinates
              origin :: Point 
              origin = (0.0, 0.0)
              originDot :: Picture
