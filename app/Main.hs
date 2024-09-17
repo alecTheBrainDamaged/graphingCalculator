@@ -1,9 +1,10 @@
 module Main where
 
 import Graphics.Gloss (Display(..), display)
-import Graphics.Gloss.Data.Color (white, orange, black, red)
+import Graphics.Gloss.Data.Color (white, orange, black, red, blue)
 import Graphics.Gloss.Data.Picture (Picture (..), Point, Path)
 import Graphics.Gloss.Interface.Environment (getScreenSize)
+import Graphics.Gloss.Interface.IO.Interact
 import Data.Tuple (fst, snd)
 import Text.Megaparsec 
 import Text.Megaparsec.Char.Lexer as L 
@@ -238,8 +239,6 @@ main = do
                         [ evalFunction (read $ show x) f 
                          | x <- [negate $ round (widthOfScreen / 2) .. round (widthOfScreen / 2)]
                         ]
-             functionLine :: Picture
-             functionLine = Color red $ Line functionLineCoordinates
              origin :: Point 
              origin = (0.0, 0.0)
              originDot :: Picture
@@ -277,13 +276,42 @@ main = do
                         positiveSide <- (Color black . Line) <$> yAxisSegmentsP 
                         let negativeSide = (Color black . Line) <$> yAxisSegmentsN 
                         positiveSide : negativeSide
-             cartesianPlane :: Picture 
-             cartesianPlane = Pictures [ xAxis
-                                  , yAxis
-                                  , originDot
-                                  , Pictures xLineMarkers
-                                  , Pictures yLineMarkers
-                                  , functionLine
-                                  ]
-         display FullScreen white cartesianPlane
- 
+             cartesianPlane :: [Picture] 
+             cartesianPlane = [ xAxis
+                              , yAxis
+                              , originDot
+                              , Pictures xLineMarkers
+                              , Pictures yLineMarkers
+                              ]
+             drawFuncAndGraph :: (Maybe Point, Path) -> IO Picture
+             drawFuncAndGraph t = 
+                  case t of
+                   (Nothing, f) -> return $ Pictures $ (Color red $ Line f) : cartesianPlane
+                   (Just point, f) -> 
+                      do
+                        let pointCircle :: Picture
+                            pointCircle = 
+                              Translate (fst point) (snd point) $ Color blue $ Circle (0.01 * widthOfScreen)
+                            coordinateText :: Picture
+                            coordinateText = 
+                              let st :: Picture
+                                  st  = Text $ "(" ++ (show $ fst point) ++ "," ++ (show $ snd point) ++ ")"
+                                  translatedSt :: Picture
+                                  translatedSt = Translate (fst point + 10) (snd point + 10) st
+                              in  Scale (0.01 * widthOfScreen) (0.01 * widthOfScreen) translatedSt
+                        return $ Pictures $ (Color red $ Line f) : pointCircle : coordinateText : cartesianPlane
+             
+             effectFunction :: Event -> (Maybe Point, Path) -> IO (Maybe Point, Path)
+             effectFunction (EventMotion (x, y)) (_, p) = 
+                 case (x,y) `elem` p of 
+                  True -> return (Just (x,y), p)
+                  False -> return (Nothing, p)
+             effectFunction _ t = return t
+         interactIO FullScreen white (Nothing, functionLineCoordinates) drawFuncAndGraph effectFunction (\_ -> return ())
+         -- interactIO :: Display
+       --              -> Color
+        --             -> world -- Path
+        --             -> (world -> IO Picture) Path -> IO Picture
+         --            -> (Event -> world -> IO world) -> Event -> Path -> IO Path
+         --            -> (Controller -> IO ())
+          --           -> IO ()
