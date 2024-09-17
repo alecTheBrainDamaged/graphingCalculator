@@ -298,7 +298,7 @@ main = do
                                   st  = Text $ "(" ++ (show $ fst point) ++ "," ++ (show $ snd point) ++ ")"
                                   translatedSt :: Picture
                                   translatedSt = Translate (fst point + 10) (snd point + 10) st
-                              in  Scale (0.1 * widthOfScreen) (0.1 * widthOfScreen) translatedSt
+                              in  translatedSt
                         return $ Pictures $ (Color red $ Line f) : pointCircle : coordinateText : cartesianPlane
              
              effectFunction :: Event -> (Maybe Point, Path) -> IO (Maybe Point, Path)
